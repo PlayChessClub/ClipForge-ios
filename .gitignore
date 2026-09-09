@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Xcode 用户状态 / 派生数据
+*.xcuserstate
+xcuserdata/
+DerivedData/
+build/
+*.hmap
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.pbxuser
+
+# 本地临时文件 / 备份 / 截图
+*.bak
+/icon_1024.png
+/simulator_home.png
+/simulator_aurora.png
+/simulator_plain.png
