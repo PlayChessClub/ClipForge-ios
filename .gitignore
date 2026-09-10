@@ -1,7 +1,16 @@
-# macOS
-.DS_Store
+# ===== ClipForge iOS — .gitignore =====
+# 作用:忽略本地构建产物、Xcode 用户数据、含个人信息的本地配置与密钥,
+#       防止它们被误提交 / 误推上云。
+# 注意:`project.pbxproj` 必须入库(否则工程丢失),无法忽略;
+#       其内 Team ID 请保持占位符 `YOUR_TEAM_ID` 提交,本地构建时再填回真实值且不 `git add`。
 
-# Xcode 用户状态 / 派生数据
+# --- macOS / 编辑器 ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- Xcode 用户状态 / 派生数据(含签名缓存、开发者证书引用) ---
 *.xcuserstate
 xcuserdata/
 DerivedData/
@@ -11,13 +20,38 @@ build/
 *.mode2v3
 *.perspectivev3
 *.pbxuser
+*.xcscmblueprint
 
-# 本地临时文件 / 备份 / 截图
-*.bak
-/icon_1024.png
-/simulator_home.png
-/simulator_aurora.png
-/simulator_plain.png
-
-# 本地导出的 IPA（源码仓库不发布预编译二进制）
+# --- 本地构建产物 / 导出的 IPA(源码仓库不发布预编译二进制) ---
 build-ipa/
+*.ipa
+*.app
+*.dSYM
+*.dSYM.zip
+
+# --- 根目录临时大图 / 模拟器截图(不要入库;Assets.xcassets/ 内的图标不受影响) ---
+/icon_1024.png
+/simulator_*.png
+
+# --- 本地临时备份 ---
+*.bak
+
+# --- 含个人信息的本地配置(把 Team ID / 证书路径放这里,永不入库) ---
+Config.local.xcconfig
+*.local.xcconfig
+.env
+env.local
+
+# --- 密钥 / 凭据(绝对禁止上云) ---
+*.p12
+*.pfx
+*.cer
+*.crt
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+secrets*
+
+# --- 日志 ---
+*.log
