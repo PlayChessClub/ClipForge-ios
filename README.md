@@ -2,6 +2,11 @@
 
 ClipForge 的 iOS / iPadOS 客户端。把「图片生成、图生视频、语音合成与声音克隆、素材时间线拼接导出」整合进一个 App，复刻 macOS 版的核心能力，针对移动端重新组织交互。
 
+> **仓库关系**：本仓库（`PlayChessClub/ClipForge-ios`）是 iOS 正式实现。
+> 另有两条平行发布线：[videogenerator](https://github.com/PlayChessClub/videogenerator)（macOS 原生，主力）与
+> [clipforge-web](https://github.com/PlayChessClub/clipforge-web)（Windows / Linux Web 版）。
+> macOS 仓库内的 `ClipForgeAI/ios/` 是**早期 swiftc 版 iOS 尝试（历史遗留、不再维护）**，与本仓库无关，以本仓库为准。
+
 ## 功能
 
 - **图片生成**：试试手气 / 试试手气 Pro 两阶段（向量选句 + qwen-plus 扩写）；多模型、1:1 / 16:9 / 9:16 尺寸、1/2/4 张可选；提交前弹出 Token 消耗确认。
@@ -39,8 +44,15 @@ clipforgeios.xcodeproj         Xcode 26 工程（PBXFileSystemSynchronizedRootGr
 
 ## 签名
 
-`project.pbxproj` 已写入 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`、`CODE_SIGN_STYLE = Automatic`。
-换成自己的账号：把 pbxproj 里的 `DEVELOPMENT_TEAM` 改成你的 Team ID，Xcode 会自动用你的证书与描述文件。
+本仓库 `project.pbxproj` 已写入**真实的签名配置**，可直接运行：
+
+- `CODE_SIGN_STYLE = Automatic`
+- `DEVELOPMENT_TEAM = B95C3UFWBA`（随工程携带的 Team；**不是占位符**）
+- `PRODUCT_BUNDLE_IDENTIFIER = videogenerator.clipforgeios`（Tests 为 `videogenerator.clipforgeiosTests`）
+
+**换成你自己的 Apple ID**（推荐，避免团队冲突）：在 Xcode 里打开工程 → 选项目 → *Signing & Capabilities* →
+把 **Team** 改成你自己的（免费个人账号即可），并把 **Bundle Identifier** 改成全局唯一（例如
+`com.<你的名字>.clipforgeios`）；Xcode 会自动生成个人证书与描述文件。
 
 ## 说明
 
