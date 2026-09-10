@@ -35,12 +35,12 @@ enum ExportEngine {
         let normalizedSize: CGSize
     }
 
-    // iOS 适配：同步轨道读取（iOS 16 目标下无需 macOS 版的 async AVCompat 包装）
-    private static func videoTrack(_ asset: AVAsset) -> AVAssetTrack? {
-        asset.tracks(withMediaType: .video).first
+    // iOS 16+：改用 async AVFoundation 加载 API（消除 iOS 16 deprecation 警告）
+    private static func videoTrack(_ asset: AVAsset) async throws -> AVAssetTrack? {
+        try await asset.loadTracks(withMediaType: .video).first
     }
-    private static func audioTrack(_ asset: AVAsset) -> AVAssetTrack? {
-        asset.tracks(withMediaType: .audio).first
+    private static func audioTrack(_ asset: AVAsset) async throws -> AVAssetTrack? {
+        try await asset.loadTracks(withMediaType: .audio).first
     }
 
     static func export(_ plan: Plan, to output: URL,
@@ -61,12 +61,13 @@ enum ExportEngine {
 
         for (i, url) in plan.videos.enumerated() {
             let asset = AVURLAsset(url: url)
-            guard let v = videoTrack(asset) else { throw ExportError.badVideo }
-            let a = audioTrack(asset)
+            guard let v = try await videoTrack(asset) else { throw ExportError.badVideo }
+            let a = try await audioTrack(asset)
 
-            let size = v.naturalSize.applying(v.preferredTransform)
+            let naturalSize = try await v.load(.naturalSize)
+            let size = naturalSize.applying(try await v.load(.preferredTransform))
             let norm = CGSize(width: abs(size.width), height: abs(size.height))
-            let dur = asset.duration
+            let dur = try await asset.load(.duration)
             if renderSize == nil { renderSize = norm }
 
             let range = CMTimeRange(start: .zero, duration: dur)
@@ -84,8 +85,8 @@ enum ExportEngine {
         // 配音模式：插入替换音轨
         if plan.mode == .dub, let audioURL = plan.dubAudio {
             let audioAsset = AVURLAsset(url: audioURL)
-            if let a = audioTrack(audioAsset) {
-                let ad = audioAsset.duration
+            if let a = try await audioTrack(audioAsset) {
+                let ad = try await audioAsset.load(.duration)
                 let d = min(ad.seconds, CMTimeGetSeconds(total))
                 let r = CMTimeRange(start: .zero, duration: CMTime(seconds: max(d, 0.1), preferredTimescale: 600))
                 try? trackA?.insertTimeRange(r, of: a, at: .zero)

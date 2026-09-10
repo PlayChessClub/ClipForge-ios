@@ -244,7 +244,7 @@ struct VoiceView: View {
                             }
 
                             if busy { ProgressView("合成中…") }
-                            if let data = audioData, isPlaying {
+                            if audioData != nil, isPlaying {
                                 Label("播放中…", systemImage: "speaker.wave.2.fill").font(.footnote)
                             }
                         }
@@ -423,7 +423,7 @@ struct VoiceView: View {
             log = "调用 CosyVoice 合成…"
             let r = try await CosyVoiceTTS.synthesize(text: text, voiceId: vid, apiKey: settings.apiKey)
             audioData = r.audio
-            try await saveAudio(r.audio)
+            await saveAudio(r.audio)
             play(data: r.audio)
             let est = TokenEstimator.estimateTTS(text: text)
             BillStore.shared.add(BillEntry(
