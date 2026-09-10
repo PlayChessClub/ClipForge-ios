@@ -44,15 +44,20 @@ clipforgeios.xcodeproj         Xcode 26 工程（PBXFileSystemSynchronizedRootGr
 
 ## 签名
 
-本仓库 `project.pbxproj` 已写入**真实的签名配置**，可直接运行：
+仓库内的工程配置：
 
 - `CODE_SIGN_STYLE = Automatic`
-- `DEVELOPMENT_TEAM = B95C3UFWBA`（随工程携带的 Team；**不是占位符**）
+- `DEVELOPMENT_TEAM = YOUR_TEAM_ID`（**占位符**，入库即为占位符）
 - `PRODUCT_BUNDLE_IDENTIFIER = videogenerator.clipforgeios`（Tests 为 `videogenerator.clipforgeiosTests`）
 
-**换成你自己的 Apple ID**（推荐，避免团队冲突）：在 Xcode 里打开工程 → 选项目 → *Signing & Capabilities* →
-把 **Team** 改成你自己的（免费个人账号即可），并把 **Bundle Identifier** 改成全局唯一（例如
-`com.<你的名字>.clipforgeios`）；Xcode 会自动生成个人证书与描述文件。
+运行时按下面填自己的 Team（免费个人账号即可）：
+
+1. Xcode 打开工程 → 选项目 → *Signing & Capabilities*；
+2. **Team** 选你自己的账号（或填入你的 Team ID）；Bundle Identifier 改成全局唯一（例如 `com.<你的名字>.clipforgeios`）；
+3. Xcode 会自动生成个人证书与描述文件。
+
+> ⚠️ 本地填入真实 Team 后，`clipforgeios.xcodeproj/project.pbxproj` 会变成“已修改”状态——**请勿 `git add` / 提交该改动**，保持入库版本是占位符 `YOUR_TEAM_ID`，避免他人 clone 后签名冲突。
+> 若已误改想还原：`git checkout -- clipforgeios.xcodeproj/project.pbxproj`（还原后需在 Xcode 重新选一次 Team）。
 
 ## 说明
 
