@@ -207,11 +207,14 @@ struct VideoView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("生成模型").font(.subheadline)
             Picker("模型", selection: $m.model) {
-                ForEach(FixedModel.videoModels, id: \.self) { mo in
-                    Text("\(mo) · \(FixedModel.videoKindName(mo))").tag(mo)
+                ForEach(FixedModel.videoModels) { mo in
+                    Text("\(mo.id) · \(mo.kindName) · \(mo.priceText)").tag(mo.id)
                 }
             }
             .pickerStyle(.menu)
+            if let info = FixedModel.modelInfo(m.model) {
+                Text(info.merits).font(.caption).foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal)
     }

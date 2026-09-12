@@ -12,6 +12,7 @@ import UniformTypeIdentifiers
 @MainActor
 final class VoiceCloneModel: ObservableObject {
     @Published var cloningURL: String = ""
+    @Published var ttsModel: String = FixedModel.ttsDefault
     @Published var myVoices: [[String: Any]] = []
     @Published var busy = false
     @Published var status = "就绪"
@@ -117,7 +118,7 @@ final class VoiceCloneModel: ObservableObject {
         busy = true; status = "提交音色克隆请求…"
         defer { busy = false }
         do {
-            let vid = try await client.createVoice(targetModel: FixedModel.tts, prefix: prefix, url: url)
+            let vid = try await client.createVoice(targetModel: ttsModel, prefix: prefix, url: url)
             newVoiceId = vid
             status = "已提交，正在轮询状态…"
             await pollUntilReady(vid: vid)
@@ -133,10 +134,10 @@ final class VoiceCloneModel: ObservableObject {
         status = "上传参考音频到临时 OSS…"
         defer { busy = false }
         do {
-            let oss = try await client.uploadToOSS(model: FixedModel.tts, fileURL: f)
+            let oss = try await client.uploadToOSS(model: ttsModel, fileURL: f)
             cloningURL = oss
             status = "提交音色克隆请求…"
-            let vid = try await client.createVoice(targetModel: FixedModel.tts, prefix: prefix, url: oss)
+            let vid = try await client.createVoice(targetModel: ttsModel, prefix: prefix, url: oss)
             newVoiceId = vid
             status = "已提交，正在轮询状态…"
             await pollUntilReady(vid: vid)
@@ -223,6 +224,17 @@ struct VoiceView: View {
 
                         // MARK: 合成
                         Group {
+                            Text("合成模型").font(.headline)
+                            Picker("模型", selection: $clone.ttsModel) {
+                                ForEach(FixedModel.ttsModels) { mo in
+                                    Text("\(mo.id) · \(mo.priceText)").tag(mo.id)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            if let info = FixedModel.modelInfo(clone.ttsModel) {
+                                Text(info.merits).font(.caption).foregroundStyle(.secondary)
+                            }
+
                             Text("文案 / 旁白").font(.headline)
                             TextEditor(text: $text)
                                 .frame(minHeight: 100)
@@ -421,13 +433,14 @@ struct VoiceView: View {
         busy = true; defer { busy = false }
         do {
             log = "调用 CosyVoice 合成…"
-            let r = try await CosyVoiceTTS.synthesize(text: text, voiceId: vid, apiKey: settings.apiKey)
+            let r = try await CosyVoiceTTS.synthesize(text: text, voiceId: vid, apiKey: settings.apiKey,
+                                                      model: clone.ttsModel)
             audioData = r.audio
             await saveAudio(r.audio)
             play(data: r.audio)
-            let est = TokenEstimator.estimateTTS(text: text)
+            let est = TokenEstimator.estimateTTS(text: text, model: clone.ttsModel)
             BillStore.shared.add(BillEntry(
-                action: "语音合成", model: FixedModel.tts, summary: String(text.prefix(40)),
+                action: "语音合成", model: clone.ttsModel, summary: String(text.prefix(40)),
                 unitName: "字符", unitCount: text.count,
                 tokenMin: est.tokenMin, tokenMax: est.tokenMax,
                 amountText: est.amount, detail: est.detail, taskId: nil))

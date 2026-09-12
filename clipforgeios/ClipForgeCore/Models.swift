@@ -2,12 +2,19 @@ import Foundation
 import SwiftUI
 import Combine
 
-// MARK: - 固定模型标识（不可更换）
+// MARK: - 模型信息（下拉展示：能力名 + 单价 + 一句话优势）
+
+struct ModelInfo: Identifiable {
+    let id: String          // 模型标识（调 API 用）
+    let kindName: String    // 能力名：文生视频 / 图生视频 / 语音合成
+    let priceText: String   // 官方单价文案
+    let merits: String      // 一句话优势（简单话语总结）
+}
+
+// MARK: - 模型目录（来自百炼模型广场，价格升序）
 
 enum FixedModel {
-    static let tts = "cosyvoice-v3.5-plus"
     static let voiceEnrollment = "voice-enrollment"
-    static let videoI2V = "wan2.6-i2v"
     static let imageDefault = "qwen-image-2.0"
     static let imageModels = ["qwen-image-2.0", "qwen-image-2.0-pro", "wan2.7-image", "wan2.7-image-pro"]
 
@@ -17,8 +24,63 @@ enum FixedModel {
     /// 文本生成模型（「试试手气 Pro」阶段二：把选中的词库句子扩充成 ~500 字的新提示词）
     static let textGeneration = "qwen-plus"
 
-    /// 视频生成模型
-    static let videoModels = ["wan2.6-i2v", "wan2.7-i2v", "wan2.6-i2v-flash", "wan2.7-t2v", "wan2.6-t2v"]
+    /// 视频生成模型（价格升序；t2v 无需首帧图，i2v 需要）
+    static let videoModels: [ModelInfo] = [
+        ModelInfo(id: "wan2.6-i2v-flash", kindName: "图生视频",
+                  priceText: "¥0.15–0.5/秒",
+                  merits: "最省最快：无声 720P 低至 0.15/秒，智能分镜多镜头叙事"),
+        ModelInfo(id: "wan2.6-t2v", kindName: "文生视频",
+                  priceText: "¥0.6–1.0/秒",
+                  merits: "纯文字生成视频，无需首帧图"),
+        ModelInfo(id: "wan2.6-i2v", kindName: "图生视频",
+                  priceText: "¥0.6–1.0/秒",
+                  merits: "首帧图精准控制构图与角色一致性"),
+        ModelInfo(id: "wan2.7-t2v", kindName: "文生视频",
+                  priceText: "¥0.6–1.0/秒",
+                  merits: "新一代：画质与运动自然度更好"),
+        ModelInfo(id: "wan2.7-i2v", kindName: "图生视频",
+                  priceText: "¥0.6–1.0/秒",
+                  merits: "新一代：支持首尾帧过渡与视频续写"),
+    ]
+
+    /// 语音合成模型（价格升序；克隆音色与所用模型绑定）
+    static let ttsModels: [ModelInfo] = [
+        ModelInfo(id: "cosyvoice-v3.5-flash", kindName: "语音合成",
+                  priceText: "¥0.8/万字符",
+                  merits: "实惠之选：日常配音足够，支持克隆与指令控制"),
+        ModelInfo(id: "cosyvoice-v3.5-plus", kindName: "语音合成",
+                  priceText: "¥1.5/万字符",
+                  merits: "当前旗舰（默认）：音质与克隆相似度最佳"),
+        ModelInfo(id: "cosyvoice-v3-plus", kindName: "语音合成",
+                  priceText: "¥2.0/万字符",
+                  merits: "专业场景：复刻能力更强、音质更高"),
+        ModelInfo(id: "cosyvoice-v2", kindName: "语音合成",
+                  priceText: "¥2.0/万字符",
+                  merits: "成熟稳定：系统预置音色最多"),
+    ]
+
+    /// 默认合成模型
+    static let ttsDefault = "cosyvoice-v3.5-plus"
+
+    /// 向后兼容别名（固定引用旧默认）
+    static let tts = ttsDefault
+
+    /// 默认视频模型
+    static let videoI2V = "wan2.6-i2v"
+
+    /// 查模型展示信息（视频+语音目录合并查找）
+    static func modelInfo(_ id: String) -> ModelInfo? {
+        videoModels.first { $0.id == id } ?? ttsModels.first { $0.id == id }
+    }
+
+    /// TTS 单价（元/万字符），未知模型按旗舰价保守估
+    static func ttsPricePer10k(_ id: String) -> Double {
+        switch id {
+        case "cosyvoice-v3.5-flash": return 0.8
+        case "cosyvoice-v3.5-plus":  return 1.5
+        default:                     return 2.0
+        }
+    }
 
     /// 是否为文生视频（不需要首帧图片）
     static func isTextToVideo(_ m: String) -> Bool { m.hasSuffix("-t2v") }

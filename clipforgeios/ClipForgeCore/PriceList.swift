@@ -12,17 +12,18 @@ struct PriceRow: Identifiable {
 
 enum PriceList {
 
+    // 视频生成（价格升序；文生视频 / 图生视频，均按秒计费）
     static let video: [PriceRow] = [
+        PriceRow(model: "wan2.6-i2v-flash", name: "图生视频·Flash", unit: "元/秒",
+                 price: "无声 0.15/0.25 · 有声 0.3/0.5"),
         PriceRow(model: "wan2.6-t2v",       name: "文生视频", unit: "元/秒",
-                 price: "720P ¥0.6 · 1080P ¥1.0"),
-        PriceRow(model: "wan2.7-t2v",       name: "文生视频", unit: "元/秒",
                  price: "720P ¥0.6 · 1080P ¥1.0"),
         PriceRow(model: "wan2.6-i2v",       name: "图生视频", unit: "元/秒",
                  price: "720P ¥0.6 · 1080P ¥1.0"),
-        PriceRow(model: "wan2.7-i2v",       name: "图生视频", unit: "元/秒",
+        PriceRow(model: "wan2.7-t2v",       name: "文生视频·新一代", unit: "元/秒",
                  price: "720P ¥0.6 · 1080P ¥1.0"),
-        PriceRow(model: "wan2.6-i2v-flash", name: "图生视频·Flash", unit: "元/秒",
-                 price: "有声 0.3/0.5 · 无声 0.15/0.25"),
+        PriceRow(model: "wan2.7-i2v",       name: "图生视频·新一代", unit: "元/秒",
+                 price: "720P ¥0.6 · 1080P ¥1.0"),
     ]
 
     static let image: [PriceRow] = [
@@ -32,8 +33,12 @@ enum PriceList {
         PriceRow(model: "wan2.7-image-pro",   name: "文生图", unit: "元/张", price: "¥0.50"),
     ]
 
+    // 语音（价格升序；按字符 / 随出账）
     static let audio: [PriceRow] = [
-        PriceRow(model: "cosyvoice-v3.5-plus", name: "语音合成", unit: "元/万字符", price: "¥1.50"),
+        PriceRow(model: "cosyvoice-v3.5-flash", name: "语音合成·实惠", unit: "元/万字符", price: "¥0.80"),
+        PriceRow(model: "cosyvoice-v3.5-plus",  name: "语音合成·旗舰", unit: "元/万字符", price: "¥1.50"),
+        PriceRow(model: "cosyvoice-v3-plus",    name: "语音合成·专业", unit: "元/万字符", price: "¥2.00"),
+        PriceRow(model: "cosyvoice-v2",         name: "语音合成·稳定", unit: "元/万字符", price: "¥2.00"),
         PriceRow(model: "voice-enrollment",     name: "声音克隆", unit: "按出账",
                  price: "随训练/合成出账"),
     ]

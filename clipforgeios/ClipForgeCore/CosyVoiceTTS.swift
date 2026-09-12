@@ -1,6 +1,6 @@
 import Foundation
 
-/// CosyVoice 全双工 WebSocket 语音合成（model=cosyvoice-v3.5-plus + voice_id）
+/// CosyVoice 全双工 WebSocket 语音合成（模型可选 + voice_id）
 enum CosyVoiceTTS {
     struct Result {
         let audio: Data
@@ -9,6 +9,7 @@ enum CosyVoiceTTS {
 
     /// 合成一段文本，返回 mp3 数据。
     static func synthesize(text: String, voiceId: String, apiKey: String,
+                           model: String = FixedModel.ttsDefault,
                            speechRate: Double = 1.0, volume: Int = 50, pitch: Double = 1.0,
                            instruction: String? = nil) async throws -> Result {
         let trimmed = apiKey.trimmingCharacters(in: .whitespaces)
@@ -43,7 +44,7 @@ enum CosyVoiceTTS {
         let runTask: [String: Any] = [
             "header": ["action": "run-task", "task_id": taskId, "streaming": "duplex"],
             "payload": [
-                "model": FixedModel.tts,
+                "model": model,
                 "task_group": "audio",
                 "task": "tts",
                 "function": "SpeechSynthesizer",
@@ -58,7 +59,7 @@ enum CosyVoiceTTS {
         let cont: [String: Any] = [
             "header": ["action": "continue-task", "task_id": taskId, "streaming": "duplex"],
             "payload": [
-                "model": FixedModel.tts, "task_group": "audio", "task": "tts",
+                "model": model, "task_group": "audio", "task": "tts",
                 "function": "SpeechSynthesizer", "input": ["text": text],
             ],
         ]
