@@ -204,6 +204,7 @@ struct VoiceView: View {
 
     @State private var text = "夜色渐深，城市慢慢安静下来。远处的灯火一盏盏熄灭，只剩下风穿过树梢的声音。"
     @State private var voiceId = ""
+    @State private var instruction = ""
     @State private var samples: [ResolvedSample] = []
     @State private var audioData: Data?
     @State private var isPlaying = false
@@ -434,7 +435,8 @@ struct VoiceView: View {
         do {
             log = "调用 CosyVoice 合成…"
             let r = try await CosyVoiceTTS.synthesize(text: text, voiceId: vid, apiKey: settings.apiKey,
-                                                      model: clone.ttsModel)
+                                                      model: clone.ttsModel,
+                                                      instruction: instruction.isEmpty ? nil : instruction)
             audioData = r.audio
             await saveAudio(r.audio)
             play(data: r.audio)
