@@ -52,7 +52,16 @@ final class DashScopeClient {
         }
 
         let fileName = fileURL.lastPathComponent
-        let key = dir + "/" + fileName
+        // 唯一对象名：原始文件名 + 毫秒时间戳 + 随机串。DashScope 的 upload_dir 对同一
+        // 账号可能长期稳定，若沿用原始文件名，同一素材第二次上传会撞 x-oss-forbid-overwrite
+        // 而被 OSS 直接拒为 403 AccessDenied（web/移动端「生成两次就报错」的根因）。
+        // 这里每次上传都用唯一对象名，彻底规避同名覆盖冲突。
+        let ext = (fileName as NSString).pathExtension
+        let stem = (fileName as NSString).deletingPathExtension
+        let stamp = String(Int(Date().timeIntervalSince1970 * 1000))
+        let rand = String(UUID().uuidString.prefix(6))
+        let uniqueName = "\(stem)-\(stamp)-\(rand)" + (ext.isEmpty ? "" : ".\(ext)")
+        let key = dir + "/" + uniqueName
         guard let ossURL = URL(string: host) else { throw APIError("upload_host 无效") }
         let boundary = "----ClipForge\(UUID().uuidString)"
         let mime = mimeFor(fileURL)
@@ -68,7 +77,7 @@ final class DashScopeClient {
         field("policy", policy)
         field("key", key)
         field("x-oss-object-acl", (output["x_oss_object_acl"] as? String) ?? "private")
-        field("x-oss-forbid-overwrite", (output["x_oss_object_acl"] as? String) ?? "true")
+        field("x-oss-forbid-overwrite", (output["x_oss_forbid_overwrite"] as? String) ?? "true")
         field("success_action_status", "200")
         field("x-oss-content-type", mime)
         let fileData = try Data(contentsOf: fileURL)
